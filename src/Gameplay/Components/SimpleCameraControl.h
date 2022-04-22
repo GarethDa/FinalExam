@@ -21,7 +21,7 @@ public:
 	MAKE_TYPENAME(SimpleCameraControl);
 	virtual nlohmann::json ToJson() const override;
 	static SimpleCameraControl::Sptr FromJson(const nlohmann::json& blob);
-
+	int score = 5;
 protected:
 	float _shiftMultipler;
 	glm::vec2 _mouseSensitivity;
@@ -30,4 +30,10 @@ protected:
 	glm::vec2 _currentRot;
 
 	bool _isMousePressed = false;
+
+	bool controlWithMouse = false;
+
+	bool _firstFrame;
+
+	float _moveSpeed;
 };

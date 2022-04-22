@@ -12,11 +12,13 @@
 
 SimpleCameraControl::SimpleCameraControl() :
 	IComponent(),
-	_mouseSensitivity({ 0.5f, 0.3f }),
-	_moveSpeeds(glm::vec3(1.0f)),
+	_mouseSensitivity({ 0.3f, 0.3f }),
+	_moveSpeeds(glm::vec3(0.1f)),
 	_shiftMultipler(2.0f),
 	_currentRot(glm::vec2(0.0f)),
-	_isMousePressed(false)
+	_isMousePressed(false),
+	_moveSpeed(0.15f),
+	_firstFrame(true)
 { }
 
 SimpleCameraControl::~SimpleCameraControl() = default;
@@ -24,16 +26,46 @@ SimpleCameraControl::~SimpleCameraControl() = default;
 void SimpleCameraControl::Update(float deltaTime)
 {
 	if (Application::Get().IsFocused) {
-		if (InputEngine::GetMouseState(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::Pressed) {
-			_prevMousePos = InputEngine::GetMousePos();   
+
+		if (InputEngine::GetMouseState(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::Pressed || 
+			InputEngine::GetKeyState(GLFW_KEY_ENTER) == ButtonState::Pressed) {
+			_prevMousePos = InputEngine::GetMousePos();
+			LOG_INFO("doot");
+
+
+			if (controlWithMouse)
+			{
+				glfwSetInputMode(Application::Get().GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				controlWithMouse = false;
+			}
+
+			else
+			{
+				glfwSetInputMode(Application::Get().GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				controlWithMouse = true;
+			}
+
 		}
 
-		if (InputEngine::IsMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+		/*
+		if (_firstFrame)
+		{
+			_prevMousePos = InputEngine::GetMousePos();
+			glfwSetInputMode(Application::Get().GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			LOG_INFO("doot");
+		}
+		*/
+
+		if (controlWithMouse) {
+			//if (InputEngine::IsMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)){
 			glm::dvec2 currentMousePos = InputEngine::GetMousePos();
 			glm::dvec2 delta = currentMousePos - _prevMousePos;
 
-			_currentRot.x += static_cast<float>(delta.x) * _mouseSensitivity.x;
-			_currentRot.y += static_cast<float>(delta.y) * _mouseSensitivity.y;
+			_currentRot.x -= static_cast<float>(delta.x) * _mouseSensitivity.x;
+			_currentRot.y -= static_cast<float>(delta.y) * _mouseSensitivity.y;
+
+			_currentRot.y = std::clamp(_currentRot.y, 1.0f, 179.0f);
+
 			glm::quat rotX = glm::angleAxis(glm::radians(_currentRot.x), glm::vec3(0, 0, 1));
 			glm::quat rotY = glm::angleAxis(glm::radians(_currentRot.y), glm::vec3(1, 0, 0));
 			glm::quat currentRot = rotX * rotY;
@@ -67,8 +99,21 @@ void SimpleCameraControl::Update(float deltaTime)
 
 			input *= deltaTime;
 
-			glm::vec3 worldMovement = currentRot * glm::vec4(input, 1.0f);
+			//glm::vec3 worldMovement = currentRot * glm::vec4(input, 1.0f);
+			glm::vec3 worldMovement = glm::vec3((currentRot * glm::vec4(input, 1.0f)).x, (currentRot * glm::vec4(input, 1.0f)).y, 0.0f);
+
+			if (worldMovement != glm::vec3(0.0f))
+			{
+				worldMovement = _moveSpeed * glm::normalize(worldMovement);
+			}
+
 			GetGameObject()->SetPostion(GetGameObject()->GetPosition() + worldMovement);
+		}
+
+		if (score <= 0)
+		{
+			GetGameObject()->SetPostion(glm::vec3(1000, 100, 100));
+			std::cout << "\n\n\nYOU WIN!!!!!!";
 		}
 	}
 	_prevMousePos = InputEngine::GetMousePos();
@@ -77,11 +122,8 @@ void SimpleCameraControl::Update(float deltaTime)
 void SimpleCameraControl::RenderImGui()
 {
 	LABEL_LEFT(ImGui::DragFloat2, "Mouse Sensitivity", &_mouseSensitivity.x, 0.01f);
-	LABEL_LEFT(ImGui::DragFloat3, "Move Speed       ", &_moveSpeeds.x, 0.01f, 0.01f);
-	LABEL_LEFT(ImGui::DragFloat , "Shift Multiplier ", &_shiftMultipler, 0.01f, 1.0f);
-	ImGui::Text((~InputEngine::GetMouseState(GLFW_MOUSE_BUTTON_LEFT)).c_str());
-	glm::dvec2 delta = InputEngine::GetMousePos() - _prevMousePos;
-	ImGui::Text("%d, %d", delta.x, delta.y);
+	//LABEL_LEFT(ImGui::DragFloat3, "Move Speed       ", &_moveSpeed, 0.01f, 0.01f);
+	LABEL_LEFT(ImGui::DragFloat, "Shift Multiplier ", &_shiftMultipler, 0.01f, 1.0f);
 }
 
 nlohmann::json SimpleCameraControl::ToJson() const {
@@ -92,10 +134,10 @@ nlohmann::json SimpleCameraControl::ToJson() const {
 	};
 }
 
-SimpleCameraControl::Sptr SimpleCameraControl::FromJson(const nlohmann::json& blob) {
+SimpleCameraControl::Sptr SimpleCameraControl::FromJson(const nlohmann::json & blob) {
 	SimpleCameraControl::Sptr result = std::make_shared<SimpleCameraControl>();
 	result->_mouseSensitivity = JsonGet(blob, "mouse_sensitivity", result->_mouseSensitivity);
-	result->_moveSpeeds       = JsonGet(blob, "move_speed", result->_moveSpeeds);
-	result->_shiftMultipler   = JsonGet(blob, "shift_mult", 2.0f);
+	result->_moveSpeeds = JsonGet(blob, "move_speed", result->_moveSpeeds);
+	result->_shiftMultipler = JsonGet(blob, "shift_mult", 2.0f);
 	return result;
 }

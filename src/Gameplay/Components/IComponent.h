@@ -36,7 +36,7 @@ namespace Gameplay {
 		/// True when this component is enabled and should perform update and 
 		/// renders
 		/// </summary>
-		bool IsEnabled;
+		bool IsEnabled = true;
 
 		virtual ~IComponent();
 

@@ -49,6 +49,7 @@
 #include "Gameplay/Components/MaterialSwapBehaviour.h"
 #include "Gameplay/Components/TriggerVolumeEnterBehaviour.h"
 #include "Gameplay/Components/SimpleCameraControl.h"
+#include "Gameplay/Components/LerpBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -354,10 +355,21 @@ void DefaultSceneLayer::_CreateScene()
 		// Set up the scene's camera
 		GameObject::Sptr camera = scene->MainCamera->GetGameObject()->SelfRef();
 		{
-			camera->SetPostion({ -3, -1, 5 });
+			camera->SetPostion({ -9, 2, 2 });
 			camera->LookAt(glm::vec3(0.0f));
 
 			camera->Add<SimpleCameraControl>();
+
+
+			RenderComponent::Sptr renderer = camera->Add<RenderComponent>();
+			renderer->SetMesh(monkeyMesh);
+			//renderer->SetMaterial(monkeyMaterial);
+
+			/*
+			RigidBody::Sptr physics = camera->Add<RigidBody>(RigidBodyType::Dynamic);
+			physics->AddCollider(SphereCollider::Create(0.3f));
+			physics->SetMass(0.0000001f);
+			*/
 
 			// This is now handled by scene itself!
 			//Camera::Sptr cam = camera->Add<Camera>();
@@ -383,7 +395,7 @@ void DefaultSceneLayer::_CreateScene()
 			RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
 			physics->AddCollider(BoxCollider::Create(glm::vec3(50.0f, 50.0f, 1.0f)))->SetPosition({ 0,0,-1 });
 		}
-
+		/*
 		// Add some walls :3
 		{
 			MeshResource::Sptr wall = ResourceManager::CreateAsset<MeshResource>();
@@ -414,28 +426,33 @@ void DefaultSceneLayer::_CreateScene()
 			wall4->SetPostion(glm::vec3(-10.0f, 0.0f, 1.5f));
 			plane->AddChild(wall4);
 		}
-
+		*/
 		GameObject::Sptr monkey1 = scene->CreateGameObject("Monkey 1");
 		{
 			// Set position in the scene
 			monkey1->SetPostion(glm::vec3(1.5f, 0.0f, 1.0f));
-
-			// Add some behaviour that relies on the physics body
-			monkey1->Add<JumpBehaviour>();
+			monkey1->SetRotation(glm::vec3(0.0f, 0.0f, -95.0f));
 
 			// Create and attach a renderer for the monkey
 			RenderComponent::Sptr renderer = monkey1->Add<RenderComponent>();
 			renderer->SetMesh(monkeyMesh);
 			renderer->SetMaterial(monkeyMaterial);
 
+			std::vector<glm::vec3> points{ glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.8f, 12.8f, 1.0f), 
+				glm::vec3(-7.0f, 15.0f, 1.0f), glm::vec3(-10.0f, 4.0f, 1.0f) };
+
+			monkey1->Add<LerpBehaviour>()->SetParams(points, 2.0f);
+
+			/*
 			// Example of a trigger that interacts with static and kinematic bodies as well as dynamic bodies
 			TriggerVolume::Sptr trigger = monkey1->Add<TriggerVolume>();
 			trigger->SetFlags(TriggerTypeFlags::Statics | TriggerTypeFlags::Kinematics);
 			trigger->AddCollider(BoxCollider::Create(glm::vec3(1.0f)));
 
 			monkey1->Add<TriggerVolumeEnterBehaviour>();
+			*/
 		}
-
+		/*
 		GameObject::Sptr ship = scene->CreateGameObject("Fenrir");
 		{
 			// Set position in the scene
@@ -692,6 +709,7 @@ void DefaultSceneLayer::_CreateScene()
 
 			particleManager->AddEmitter(emitter);
 		}
+		*/
 
 		GuiBatcher::SetDefaultTexture(ResourceManager::CreateAsset<Texture2D>("textures/ui-sprite.png"));
 		GuiBatcher::SetDefaultBorderRadius(8);
