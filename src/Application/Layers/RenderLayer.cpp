@@ -502,6 +502,10 @@ RenderFlags RenderLayer::GetRenderFlags() const {
 	return _renderFlags;
 }
 
+void RenderLayer::ToggleRenderFlag(int bit) {
+	_renderFlags = (_renderFlags ^ (1 << (bit)));
+}
+
 const Framebuffer::Sptr& RenderLayer::GetLightingBuffer() const {
 	return _lightingFBO;
 }

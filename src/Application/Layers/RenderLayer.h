@@ -9,7 +9,10 @@
 
 ENUM_FLAGS(RenderFlags, uint32_t,
 	None = 0,
-	EnableColorCorrection = 1 << 0
+	DisableAmbient = 1 << 0,
+	DisableSpecular = 1 << 1,
+	DisableDiffuse = 1 << 2,
+	EnableColorCorrection = 1 << 3
 );
 
 class RenderLayer final : public ApplicationLayer {
@@ -109,6 +112,8 @@ public:
 
 	void SetRenderFlags(RenderFlags value);
 	RenderFlags GetRenderFlags() const;
+
+	void ToggleRenderFlag(int bit);
 
 	const Framebuffer::Sptr& GetLightingBuffer() const;
 	const Framebuffer::Sptr& GetRenderOutput() const;

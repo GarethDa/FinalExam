@@ -50,6 +50,8 @@
 #include "Gameplay/Components/TriggerVolumeEnterBehaviour.h"
 #include "Gameplay/Components/SimpleCameraControl.h"
 #include "Gameplay/Components/LerpBehaviour.h"
+#include "Gameplay/Components/HealthManager.h"
+#include "Gameplay/Components/EnemyBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -197,6 +199,8 @@ void DefaultSceneLayer::_CreateScene()
 		// Create an empty scene
 		Scene::Sptr scene = std::make_shared<Scene>();  
 
+		scene->SetAmbientLight(glm::vec3(0.2f));
+
 		// Setting up our enviroment map
 		scene->SetSkyboxTexture(testCubemap); 
 		scene->SetSkyboxShader(skyboxShader);
@@ -330,6 +334,7 @@ void DefaultSceneLayer::_CreateScene()
 		}
 
 		// Create some lights for our scene
+		/*
 		GameObject::Sptr lightParent = scene->CreateGameObject("Lights");
 
 		for (int ix = 0; ix < 50; ix++) {
@@ -341,6 +346,15 @@ void DefaultSceneLayer::_CreateScene()
 			lightComponent->SetColor(glm::linearRand(glm::vec3(0.0f), glm::vec3(1.0f)));
 			lightComponent->SetRadius(glm::linearRand(0.1f, 10.0f));
 			lightComponent->SetIntensity(glm::linearRand(1.0f, 2.0f));
+		}
+		*/
+		GameObject::Sptr light = scene->CreateGameObject("Light");
+		{
+			light->SetPostion(glm::vec3(0.0f, 0.0f, 5.0f));
+
+			Light::Sptr lightComponent = light->Add<Light>();
+			lightComponent->SetRadius(100.0f);
+			lightComponent->SetIntensity(5.0f);
 		}
 
 		// We'll create a mesh that is a simple plane that we can resize later
@@ -359,6 +373,8 @@ void DefaultSceneLayer::_CreateScene()
 			camera->LookAt(glm::vec3(0.0f));
 
 			camera->Add<SimpleCameraControl>();
+
+			camera->Add<HealthManager>();
 
 
 			RenderComponent::Sptr renderer = camera->Add<RenderComponent>();
@@ -438,10 +454,11 @@ void DefaultSceneLayer::_CreateScene()
 			renderer->SetMesh(monkeyMesh);
 			renderer->SetMaterial(monkeyMaterial);
 
-			std::vector<glm::vec3> points{ glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.8f, 12.8f, 1.0f), 
-				glm::vec3(-7.0f, 15.0f, 1.0f), glm::vec3(-10.0f, 4.0f, 1.0f) };
+			std::vector<glm::vec3> points{ glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.8f, 12.8f, 1.0f) };
 
 			monkey1->Add<LerpBehaviour>()->SetParams(points, 2.0f);
+
+			monkey1->Add<EnemyBehaviour>();
 
 			/*
 			// Example of a trigger that interacts with static and kinematic bodies as well as dynamic bodies

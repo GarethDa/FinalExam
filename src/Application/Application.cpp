@@ -47,6 +47,8 @@
 #include "Gameplay/Components/ShadowCamera.h"
 #include "Gameplay/Components/ShipMoveBehaviour.h"
 #include "Gameplay/Components/LerpBehaviour.h"
+#include "Gameplay/Components/EnemyBehaviour.h"
+#include "Gameplay/Components/HealthManager.h"
 
 // GUI
 #include "Gameplay/Components/GUI/RectTransform.h"
@@ -218,6 +220,26 @@ void Application::_Run()
 		timing._timeSinceSceneLoad += scaledDt;
 		timing._unscaledTimeSinceSceneLoad += dt;
 
+		if (InputEngine::GetKeyState(GLFW_KEY_1) == ButtonState::Pressed)
+		{
+			GetLayer<RenderLayer>()->ToggleRenderFlag(0);
+		}
+
+		else if (InputEngine::GetKeyState(GLFW_KEY_2) == ButtonState::Pressed)
+		{
+			GetLayer<RenderLayer>()->ToggleRenderFlag(1);
+		}
+
+		else if (InputEngine::GetKeyState(GLFW_KEY_3) == ButtonState::Pressed)
+		{
+			GetLayer<RenderLayer>()->ToggleRenderFlag(2);
+		}
+
+		if (CurrentScene()->MainCamera->GetGameObject()->Get<HealthManager>()->IsDead())
+		{
+			timing.SetTimeScale(0.0f);
+		}
+
 		ImGuiHelper::StartFrame();
 
 		// Core update loop
@@ -281,6 +303,8 @@ void Application::_RegisterClasses()
 	ComponentManager::RegisterType<ShadowCamera>();
 	ComponentManager::RegisterType<ShipMoveBehaviour>();
 	ComponentManager::RegisterType<LerpBehaviour>();
+	ComponentManager::RegisterType<EnemyBehaviour>();
+	ComponentManager::RegisterType<HealthManager>();
 }
 
 void Application::_Load() {
