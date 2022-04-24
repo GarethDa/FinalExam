@@ -78,8 +78,8 @@ std::string Application::_applicationName = "INFR-2350U - DEMO";
 Application::Application() :
 	_window(nullptr),
 	_windowSize({DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT}),
-	_isRunning(false),
-	_isEditor(true),
+	_isRunning(true),
+	_isEditor(false),
 	_windowTitle("INFR - 2350U"),
 	_currentScene(nullptr),
 	_targetScene(nullptr)

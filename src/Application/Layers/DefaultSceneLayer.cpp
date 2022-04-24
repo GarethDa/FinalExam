@@ -144,6 +144,8 @@ void DefaultSceneLayer::_CreateScene()
 		// Load in the meshes
 		MeshResource::Sptr monkeyMesh = ResourceManager::CreateAsset<MeshResource>("Monkey.obj");
 		MeshResource::Sptr shipMesh   = ResourceManager::CreateAsset<MeshResource>("fenrir.obj");
+		MeshResource::Sptr FrogMesh = ResourceManager::CreateAsset<MeshResource>("Frogger.obj");
+		MeshResource::Sptr CarMesh = ResourceManager::CreateAsset<MeshResource>("Car.obj");
 
 		// Load in some textures
 		Texture2D::Sptr    boxTexture   = ResourceManager::CreateAsset<Texture2D>("textures/box-diffuse.png");
@@ -156,6 +158,9 @@ void DefaultSceneLayer::_CreateScene()
 		Texture2D::Sptr    grassTex = ResourceManager::CreateAsset<Texture2D>("textures/grass.png");
 		grassTex->SetMinFilter(MinFilter::Nearest);
 		grassTex->SetMagFilter(MagFilter::Nearest);
+
+		Texture2D::Sptr    FrogTex = ResourceManager::CreateAsset<Texture2D>("textures/Frog_Texture.png");
+		Texture2D::Sptr    CarTex = ResourceManager::CreateAsset<Texture2D>("textures/Car_Texture.png");
 
 		// Load some images for drag n' drop
 		ResourceManager::CreateAsset<Texture2D>("textures/flashlight.png");
@@ -234,6 +239,22 @@ void DefaultSceneLayer::_CreateScene()
 			grassMaterial->Set("u_Material.AlbedoMap", grassTex);
 			grassMaterial->Set("u_Material.Shininess", 0.1f);
 			grassMaterial->Set("u_Material.NormalMap", normalMapDefault);
+		}
+
+		Material::Sptr FrogMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
+		{
+			FrogMaterial->Name = "Monkey";
+			FrogMaterial->Set("u_Material.AlbedoMap", FrogTex);
+			FrogMaterial->Set("u_Material.NormalMap", normalMapDefault);
+			FrogMaterial->Set("u_Material.Shininess", 0.5f);
+		}
+
+		Material::Sptr CarMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
+		{
+			CarMaterial->Name = "Monkey";
+			CarMaterial->Set("u_Material.AlbedoMap", CarTex);
+			CarMaterial->Set("u_Material.NormalMap", normalMapDefault);
+			CarMaterial->Set("u_Material.Shininess", 0.5f);
 		}
 
 		// This will be the reflective material, we'll make the whole thing 90% reflective
@@ -403,20 +424,16 @@ void DefaultSceneLayer::_CreateScene()
 		// Set up all our sample objects
 		GameObject::Sptr goal = scene->CreateGameObject("Goal");
 		{
-			// Make a big tiled mesh
-			MeshResource::Sptr sphereMesh = ResourceManager::CreateAsset<MeshResource>();
-			sphereMesh->AddParam(MeshBuilderParam::CreateIcoSphere(ZERO, ONE, 5));
-			sphereMesh->GenerateMesh();
-
-			//goal->SetScale({ 0.25f, 0.25f, 1.0f });
-			goal->SetPostion({ 34.0f, 0.0f, 1.0f });
+			goal->SetPostion({ 34.0f, 0.0f, 0.0f });
+			goal->SetRotation({ 90.0f, 0.0f, -90.0f });
+			goal->SetScale({ 1.5f, 1.5f, 1.5f });
 
 			goal->Add<GoalBehaviour>();
 
 			// Create and attach a RenderComponent to the object to draw our mesh
 			RenderComponent::Sptr renderer = goal->Add<RenderComponent>();
-			renderer->SetMesh(sphereMesh);
-			renderer->SetMaterial(grassMaterial);
+			renderer->SetMesh(FrogMesh);
+			renderer->SetMaterial(FrogMaterial);
 
 			GameObject::Sptr particles = scene->CreateGameObject("Particles");
 			goal->AddChild(particles);
@@ -442,26 +459,27 @@ void DefaultSceneLayer::_CreateScene()
 			particleManager->AddEmitter(emitter);
 		}
 
-		GameObject::Sptr monkey1 = scene->CreateGameObject("Monkey 1");
+		GameObject::Sptr car1 = scene->CreateGameObject("Car 1");
 		{
 			// Set position in the scene
-			monkey1->SetPostion(glm::vec3(1.5f, 0.0f, 1.0f));
-			monkey1->SetRotation(glm::vec3(0.0f, 0.0f, -95.0f));
+			car1->SetScale(glm::vec3(2.5f, 2.5f, 2.5f));
+			car1->SetPostion(glm::vec3(1.5f, 0.0f, 0.0f));
+			car1->SetRotation(glm::vec3(90.0f, 0.0f, 175.0f));
 
 			// Create and attach a renderer for the monkey
-			RenderComponent::Sptr renderer = monkey1->Add<RenderComponent>();
-			renderer->SetMesh(monkeyMesh);
-			renderer->SetMaterial(monkeyMaterial);
+			RenderComponent::Sptr renderer = car1->Add<RenderComponent>();
+			renderer->SetMesh(CarMesh);
+			renderer->SetMaterial(CarMaterial);
 
-			std::vector<glm::vec3> points{ glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.8f, 12.8f, 1.0f), 
-				glm::vec3(-1.5f, -11.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f) };
+			std::vector<glm::vec3> points{ glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(2.8f, 12.8f, 0.0f), 
+				glm::vec3(-1.5f, -11.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f) };
 
-			monkey1->Add<LerpBehaviour>()->SetParams(points, 2.0f);
+			car1->Add<LerpBehaviour>()->SetParams(points, 2.0f);
 
-			monkey1->Add<EnemyBehaviour>();
+			car1->Add<EnemyBehaviour>();
 
 			GameObject::Sptr particles = scene->CreateGameObject("Particles");
-			monkey1->AddChild(particles);
+			car1->AddChild(particles);
 			particles->SetPostion({ 0.0f, 0.0f, 0.0f });
 
 			ParticleSystem::Sptr particleManager = particles->Add<ParticleSystem>();
@@ -484,25 +502,27 @@ void DefaultSceneLayer::_CreateScene()
 			particleManager->AddEmitter(emitter);
 		}
 		
-		GameObject::Sptr monkey2 = scene->CreateGameObject("Monkey 2");
+		GameObject::Sptr car2 = scene->CreateGameObject("Car 2");
 		{
 			// Set position in the scene
-			monkey2->SetPostion(glm::vec3(10.0f, 11.0f, 1.0f));
-			monkey2->SetRotation(glm::vec3(0.0f, 0.0f, 140.0f));
+			car2->SetScale(glm::vec3(2.5f, 2.5f, 2.5f));
+			car2->SetPostion(glm::vec3(10.0f, 11.0f, 0.0f));
+			car2->SetRotation(glm::vec3(90.0f, 0.0f, 50.0f));
 
 			// Create and attach a renderer for the monkey
-			RenderComponent::Sptr renderer = monkey2->Add<RenderComponent>();
-			renderer->SetMesh(monkeyMesh);
-			renderer->SetMaterial(monkeyMaterial);
+			RenderComponent::Sptr renderer = car2->Add<RenderComponent>();
+			renderer->SetMesh(CarMesh);
+			renderer->SetMaterial(CarMaterial);
 
-			std::vector<glm::vec3> points{ glm::vec3(10.0f, 11.0f, 1.0f), glm::vec3(16.0f, 5.0f, 1.0f), glm::vec3(11.0f, -10.5f, 1.0f), glm::vec3(2.5f, -5.0f, 1.0f) };
+			std::vector<glm::vec3> points{ glm::vec3(10.0f, 11.0f, 0.0f), glm::vec3(16.0f, 5.0f, 0.0f), 
+				glm::vec3(11.0f, -10.5f, 0.0f), glm::vec3(2.5f, -5.0f, 0.0f) };
 
-			monkey2->Add<LerpBehaviour>()->SetParams(points, 1.5f, true, false);
+			car2->Add<LerpBehaviour>()->SetParams(points, 1.5f, true, false);
 
-			monkey2->Add<EnemyBehaviour>();
+			car2->Add<EnemyBehaviour>();
 
 			GameObject::Sptr particles = scene->CreateGameObject("Particles");
-			monkey2->AddChild(particles);
+			car2->AddChild(particles);
 			particles->SetPostion({ 0.0f, 0.0f, 0.0f });
 
 			ParticleSystem::Sptr particleManager = particles->Add<ParticleSystem>();
@@ -525,25 +545,27 @@ void DefaultSceneLayer::_CreateScene()
 			particleManager->AddEmitter(emitter);
 		}
 
-		GameObject::Sptr monkey3 = scene->CreateGameObject("Monkey 3");
+		GameObject::Sptr car3 = scene->CreateGameObject("Car 3");
 		{
 			// Set position in the scene
-			monkey3->SetPostion(glm::vec3(20.0f, 11.0f, 1.0f));
-			monkey3->SetRotation(glm::vec3(0.0f, 0.0f, 119.0f));
+			car3->SetScale(glm::vec3(2.5f, 2.5f, 2.5f));
+			car3->SetPostion(glm::vec3(20.0f, 11.0f, 0.0f));
+			car3->SetRotation(glm::vec3(90.0f, 0.0f, 30.0f));
 
 			// Create and attach a renderer for the monkey
-			RenderComponent::Sptr renderer = monkey3->Add<RenderComponent>();
-			renderer->SetMesh(monkeyMesh);
-			renderer->SetMaterial(monkeyMaterial);
+			RenderComponent::Sptr renderer = car3->Add<RenderComponent>();
+			renderer->SetMesh(CarMesh);
+			renderer->SetMaterial(CarMaterial);
 
-			std::vector<glm::vec3> points{ glm::vec3(20.0f, 11.0f, 1.0f), glm::vec3(25.0f, 0.0f, 1.0f), glm::vec3(20.0f, -11.0f, 1.0f), glm::vec3(17.0f, 0.0f, 1.0f) };
+			std::vector<glm::vec3> points{ glm::vec3(20.0f, 11.0f, 0.0f), glm::vec3(25.0f, 0.0f, 0.0f), 
+				glm::vec3(20.0f, -11.0f, 0.0f), glm::vec3(17.0f, 0.0f, 0.0f) };
 
-			monkey3->Add<LerpBehaviour>()->SetParams(points, 1.0f, true, false);
+			car3->Add<LerpBehaviour>()->SetParams(points, 1.0f, true, false);
 
-			monkey3->Add<EnemyBehaviour>();
+			car3->Add<EnemyBehaviour>();
 
 			GameObject::Sptr particles = scene->CreateGameObject("Particles");
-			monkey3->AddChild(particles);
+			car3->AddChild(particles);
 			particles->SetPostion({ 0.0f, 0.0f, 0.0f });
 
 			ParticleSystem::Sptr particleManager = particles->Add<ParticleSystem>();
@@ -610,6 +632,28 @@ void DefaultSceneLayer::_CreateScene()
 			canPanel->SetTexture(ResourceManager::CreateAsset<Texture2D>("textures/loseText.png"));
 			canPanel->SetTransparency(0.0f);
 
+		}
+
+		GameObject::Sptr heart1 = scene->CreateGameObject("Heart 1");
+		{
+			RectTransform::Sptr transform = heart1->Add<RectTransform>();
+			transform->SetMin({ 0, 0 });
+			transform->SetMax({ 100, 100 });
+
+			GuiPanel::Sptr canPanel = heart1->Add<GuiPanel>();
+			canPanel->SetTexture(ResourceManager::CreateAsset<Texture2D>("textures/Heart.png"));
+			canPanel->SetTransparency(1.0f);
+		}
+
+		GameObject::Sptr heart2 = scene->CreateGameObject("Heart 2");
+		{
+			RectTransform::Sptr transform = heart2->Add<RectTransform>();
+			transform->SetMin({ 100, 0 });
+			transform->SetMax({ 200, 100 });
+
+			GuiPanel::Sptr canPanel = heart2->Add<GuiPanel>();
+			canPanel->SetTexture(ResourceManager::CreateAsset<Texture2D>("textures/Heart.png"));
+			canPanel->SetTransparency(1.0f);
 		}
 
 		GuiBatcher::SetDefaultTexture(ResourceManager::CreateAsset<Texture2D>("textures/ui-sprite.png"));

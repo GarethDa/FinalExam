@@ -137,9 +137,9 @@ void LerpBehaviour::Update(float deltaTime) {
 
 			glm::quat angleQuat;
 
-			if (clockwise) angleQuat = glm::angleAxis(angle, glm::vec3(0, 0, 1));
+			if (clockwise) angleQuat = glm::angleAxis(angle, glm::vec3(0, 1, 0));
 
-			else angleQuat = glm::angleAxis(angle, glm::vec3(0, 0, -1));
+			else angleQuat = glm::angleAxis(angle, glm::vec3(0, -1, 0));
 
 			//else angleQuat = glm::angleAxis(angle, glm::vec3(0, 1, 0));
 

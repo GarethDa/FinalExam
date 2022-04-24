@@ -5,6 +5,7 @@
 #include "Gameplay/Scene.h"
 #include "Utils/ImGuiHelper.h"
 #include "Application/Application.h"
+#include "Gameplay/Components/GUI/GuiPanel.h"
 
 EnemyBehaviour::EnemyBehaviour()
 	: IComponent(),
@@ -24,9 +25,20 @@ void EnemyBehaviour::Update(float deltaTime)
 
 	invTime -= deltaTime;
 
-	if (glm::length(camObject->GetPosition() - GetGameObject()->GetPosition()) < 2.0f && invTime <= 0.0f)
+	if (glm::length(camObject->GetPosition() - GetGameObject()->GetPosition()) < 2.5f && invTime <= 0.0f)
 	{
 		camObject->Get<HealthManager>()->TakeHit();
+
+		if (camObject->Get<HealthManager>()->GetHealth() == 1)
+		{
+			app.CurrentScene()->FindObjectByName("Heart 2")->Get<GuiPanel>()->SetTransparency(0.0f);
+		}
+
+		else
+		{
+			app.CurrentScene()->FindObjectByName("Heart 1")->Get<GuiPanel>()->SetTransparency(0.0f);
+		}
+
 		invTime = 1.5f;
 	}
 
