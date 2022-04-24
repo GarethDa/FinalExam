@@ -59,6 +59,7 @@ void LerpBehaviour::Update(float deltaTime) {
 				if (currentInd == points.size() - 1)
 				{
 					forward = false;
+					clockwise = !clockwise;
 				}
 
 				if (points.size() == 2)
@@ -93,6 +94,7 @@ void LerpBehaviour::Update(float deltaTime) {
 				if (currentInd == 0)
 				{
 					forward = true;
+					clockwise = !clockwise;
 				}
 
 				if (points.size() == 2)
@@ -135,7 +137,7 @@ void LerpBehaviour::Update(float deltaTime) {
 
 			glm::quat angleQuat;
 
-			if (forward) angleQuat = glm::angleAxis(angle, glm::vec3(0, 0, 1));
+			if (clockwise) angleQuat = glm::angleAxis(angle, glm::vec3(0, 0, 1));
 
 			else angleQuat = glm::angleAxis(angle, glm::vec3(0, 0, -1));
 
@@ -150,9 +152,10 @@ void LerpBehaviour::Update(float deltaTime) {
 	}
 }
 
-void LerpBehaviour::SetParams(std::vector<glm::vec3> inPoints, float inSegmentTime, bool inForward)
+void LerpBehaviour::SetParams(std::vector<glm::vec3> inPoints, float inSegmentTime, bool inForward, bool inClockwise)
 {
 	points = inPoints;
 	segmentTime = inSegmentTime;
 	forward = inForward;
+	clockwise = inClockwise;
 }

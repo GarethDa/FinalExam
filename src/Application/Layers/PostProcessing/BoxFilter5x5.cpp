@@ -3,6 +3,8 @@
 #include "Utils/JsonGlmHelpers.h"
 #include "Utils/ImGuiHelper.h"
 #include "Graphics/Framebuffer.h"
+#include "Application/Application.h"
+#include "Gameplay/Components/HealthManager.h"
 
 #include <GLM/glm.hpp>
 
@@ -13,12 +15,40 @@ BoxFilter5x5::BoxFilter5x5() :
 	_format = RenderTargetType::ColorRgb8;
 
 	memset(Filter, 0, sizeof(float) * 25);
-	Filter[12] = 1.0f;
+	{
+		Filter[0] = 1.0f / 273.0f;
+		Filter[1] = 4.0f / 273.0f;
+		Filter[2] = 7.0f / 273.0f;
+		Filter[3] = 4.0f / 273.0f;
+		Filter[4] = 1.0f / 273.0f;
+		Filter[5] = 4.0f / 273.0f;
+		Filter[6] = 16.0f / 273.0f;
+		Filter[7] = 26.0f / 273.0f;
+		Filter[8] = 16.0f / 273.0f;
+		Filter[9] = 4.0f / 273.0f;
+		Filter[10] = 7.0f / 273.0f;
+		Filter[11] = 26.0f / 273.0f;
+		Filter[12] = 41.0f / 273.0f;
+		Filter[24] = 1.0f / 273.0f;
+		Filter[23] = 4.0f / 273.0f;
+		Filter[22] = 7.0f / 273.0f;
+		Filter[21] = 4.0f / 273.0f;
+		Filter[20] = 1.0f / 273.0f;
+		Filter[19] = 4.0f / 273.0f;
+		Filter[18] = 16.0f / 273.0f;
+		Filter[17] = 26.0f / 273.0f;
+		Filter[16] = 16.0f / 273.0f;
+		Filter[15] = 4.0f / 273.0f;
+		Filter[14] = 7.0f / 273.0f;
+		Filter[13] = 26.0f / 273.0f;
+	}
 
 	_shader = ResourceManager::CreateAsset<ShaderProgram>(std::unordered_map<ShaderPartType, std::string>{
 		{ ShaderPartType::Vertex, "shaders/vertex_shaders/fullscreen_quad.glsl" },
 		{ ShaderPartType::Fragment, "shaders/fragment_shaders/post_effects/box_filter_5.glsl" }
 	});
+
+	Enabled = false;
 }
 
 BoxFilter5x5::~BoxFilter5x5() = default;
@@ -27,7 +57,7 @@ void BoxFilter5x5::Apply(const Framebuffer::Sptr& gBuffer)
 {
 	_shader->Bind();
 	_shader->SetUniform("u_Filter", Filter, 25);
-	_shader->SetUniform("u_PixelSize", glm::vec2(1.0f) / (glm::vec2)gBuffer->GetSize()); 
+	_shader->SetUniform("u_PixelSize", glm::vec2(1.0f) / (glm::vec2)gBuffer->GetSize());
 }
 
 void BoxFilter5x5::RenderImGui()

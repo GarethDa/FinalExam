@@ -27,7 +27,7 @@ void EnemyBehaviour::Update(float deltaTime)
 	if (glm::length(camObject->GetPosition() - GetGameObject()->GetPosition()) < 2.0f && invTime <= 0.0f)
 	{
 		camObject->Get<HealthManager>()->TakeHit();
-		invTime = 2.0f;
+		invTime = 1.5f;
 	}
 
 }

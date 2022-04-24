@@ -14,8 +14,11 @@ void main() {
         for (int iy = -1; iy <= 1; iy++) {
             int index =  (iy + 1) * 3 + (ix + 1);
             vec2 uv = inUV + vec2(u_PixelSize.x * ix, u_PixelSize.y * iy);
-            accumulator += texture(s_Image, uv).rgb * u_Filter[index];
+
+            vec3 texSample = texture(s_Image, uv).rgb;
+            accumulator += vec3((texSample.r + texSample.g + texSample.b) / 3) * u_Filter[index];
         }
     }
-    outColor = accumulator;
+   
+   outColor = accumulator + 0.5;
 }

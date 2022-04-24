@@ -9,6 +9,7 @@
 #include "Utils/ImGuiHelper.h"
 #include "Gameplay/InputEngine.h"
 #include "Application/Application.h"
+#include "Application/Timing.h"
 
 SimpleCameraControl::SimpleCameraControl() :
 	IComponent(),
@@ -61,8 +62,13 @@ void SimpleCameraControl::Update(float deltaTime)
 			glm::dvec2 currentMousePos = InputEngine::GetMousePos();
 			glm::dvec2 delta = currentMousePos - _prevMousePos;
 
-			_currentRot.x -= static_cast<float>(delta.x) * _mouseSensitivity.x;
-			_currentRot.y -= static_cast<float>(delta.y) * _mouseSensitivity.y;
+			Timing& timing = Timing::Current();
+
+			if (timing.TimeScale() != 0.0f)
+			{
+				_currentRot.x -= static_cast<float>(delta.x) * _mouseSensitivity.x;
+				_currentRot.y -= static_cast<float>(delta.y) * _mouseSensitivity.y;
+			}
 
 			_currentRot.y = std::clamp(_currentRot.y, 1.0f, 179.0f);
 
@@ -85,12 +91,6 @@ void SimpleCameraControl::Update(float deltaTime)
 			}
 			if (InputEngine::IsKeyDown(GLFW_KEY_D)) {
 				input.x += _moveSpeeds.y;
-			}
-			if (InputEngine::IsKeyDown(GLFW_KEY_LEFT_CONTROL)) {
-				input.y -= _moveSpeeds.z;
-			}
-			if (InputEngine::IsKeyDown(GLFW_KEY_SPACE)) {
-				input.y += _moveSpeeds.z;
 			}
 
 			if (InputEngine::IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {

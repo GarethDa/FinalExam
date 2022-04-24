@@ -8,6 +8,7 @@
 #include "PostProcessing/BoxFilter5x5.h"
 #include "PostProcessing/OutlineEffect.h"
 #include "PostProcessing/DepthOfField.h"
+#include "Gameplay/Components/HealthManager.h"
 
 PostProcessingLayer::PostProcessingLayer() :
 	ApplicationLayer()
@@ -29,13 +30,13 @@ void PostProcessingLayer::AddEffect(const Effect::Sptr& effect) {
 void PostProcessingLayer::OnAppLoad(const nlohmann::json& config)
 {
 	// Loads some effects in
-	_effects.push_back(std::make_shared<ColorCorrectionEffect>());
+	//_effects.push_back(std::make_shared<ColorCorrectionEffect>());
 	_effects.push_back(std::make_shared<BoxFilter3x3>());
 	_effects.push_back(std::make_shared<BoxFilter5x5>());
-	_effects.push_back(std::make_shared<OutlineEffect>());
-	_effects.push_back(std::make_shared<DepthOfField>());
+	//_effects.push_back(std::make_shared<OutlineEffect>());
+	//_effects.push_back(std::make_shared<DepthOfField>());
 
-	GetEffect<OutlineEffect>()->Enabled = false;
+	//GetEffect<OutlineEffect>()->Enabled = false;
 
 	Application& app = Application::Get();
 	const glm::uvec4& viewport = app.GetPrimaryViewport();
@@ -85,6 +86,15 @@ void PostProcessingLayer::OnPostRender()
 
 	// Bind the quad VAO so our effects can use it
 	_quadVAO->Bind();
+
+	if (app.CurrentScene()->MainCamera->GetGameObject()->Get<HealthManager>()->GetHealth() <= 1)
+	{
+		GetEffect<BoxFilter5x5>()->Enabled = true;
+	}
+
+	if (app.paused) GetEffect<BoxFilter3x3>()->Enabled = true;
+
+	else GetEffect<BoxFilter3x3>()->Enabled = false;
 
 	// Iterate over all the effects in the queue
 	for (const auto& effect : _effects) {

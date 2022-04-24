@@ -14,12 +14,16 @@ BoxFilter3x3::BoxFilter3x3() :
 
 	// Zero the memory, then set center pixel to 1.0
 	memset(Filter, 0, sizeof(float) * 9);
-	Filter[4] = 1.0f;
+	Filter[0] = 5.0f;
+	Filter[4] = -2.5f;
+	Filter[8] = -2.5f;
 
 	_shader = ResourceManager::CreateAsset<ShaderProgram>(std::unordered_map<ShaderPartType, std::string>{
 		{ ShaderPartType::Vertex, "shaders/vertex_shaders/fullscreen_quad.glsl" },
 		{ ShaderPartType::Fragment, "shaders/fragment_shaders/post_effects/box_filter_3.glsl" }
 	});
+
+	Enabled = false;
 }
 
 BoxFilter3x3::~BoxFilter3x3() = default;

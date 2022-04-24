@@ -24,7 +24,7 @@ public:
 	virtual nlohmann::json ToJson() const override;
 	static LerpBehaviour::Sptr FromJson(const nlohmann::json& blob);
 
-	void LerpBehaviour::SetParams(std::vector<glm::vec3> inPoints, float inSegmentTime, bool inClockwise = true);
+	void LerpBehaviour::SetParams(std::vector<glm::vec3> inPoints, float inSegmentTime, bool inForward = true, bool inClockwise = true);
 
 protected:
 	float _impulse;
@@ -35,6 +35,7 @@ protected:
 	float currentTime = 0.0f;
 	int currentInd = 0;
 	bool forward;
+	bool clockwise;
 
 	Gameplay::Physics::RigidBody::Sptr _body;
 };

@@ -49,6 +49,9 @@
 #include "Gameplay/Components/LerpBehaviour.h"
 #include "Gameplay/Components/EnemyBehaviour.h"
 #include "Gameplay/Components/HealthManager.h"
+#include "Gameplay/Components/GoalBehaviour.h"
+
+#include "Gameplay/Physics/RigidBody.h"
 
 // GUI
 #include "Gameplay/Components/GUI/RectTransform.h"
@@ -235,10 +238,34 @@ void Application::_Run()
 			GetLayer<RenderLayer>()->ToggleRenderFlag(2);
 		}
 
+		if (InputEngine::GetKeyState(GLFW_KEY_ESCAPE) == ButtonState::Pressed)
+		{
+			if (paused)
+			{
+				timing.SetTimeScale(1.0f);
+				paused = false;
+			}
+
+			else
+			{
+				timing.SetTimeScale(0.0f);
+				paused = true;
+			}
+		}
+
 		if (CurrentScene()->MainCamera->GetGameObject()->Get<HealthManager>()->IsDead())
 		{
 			timing.SetTimeScale(0.0f);
+			CurrentScene()->FindObjectByName("Lose Text")->Get<GuiPanel>()->SetTransparency(1.0f);
 		}
+
+		else if (CurrentScene()->FindObjectByName("Goal")->Get<GoalBehaviour>()->GameWon())
+		{
+			timing.SetTimeScale(0.0f);
+			CurrentScene()->FindObjectByName("Win Text")->Get<GuiPanel>()->SetTransparency(1.0f);
+		}
+
+		//CurrentScene()->MainCamera->GetGameObject()->Get<Gameplay::Physics::RigidBody>()->Set
 
 		ImGuiHelper::StartFrame();
 
@@ -305,6 +332,7 @@ void Application::_RegisterClasses()
 	ComponentManager::RegisterType<LerpBehaviour>();
 	ComponentManager::RegisterType<EnemyBehaviour>();
 	ComponentManager::RegisterType<HealthManager>();
+	ComponentManager::RegisterType<GoalBehaviour>();
 }
 
 void Application::_Load() {
@@ -429,6 +457,15 @@ void Application::_HandleWindowSizeChanged(const glm::ivec2& newSize) {
 	}
 	_windowSize = newSize;
 	_primaryViewport = { 0, 0, newSize.x, newSize.y };
+
+	RectTransform::Sptr winText = CurrentScene()->FindObjectByName("Win Text")->Get<RectTransform>();
+	RectTransform::Sptr loseText = CurrentScene()->FindObjectByName("Lose Text")->Get<RectTransform>();
+
+	winText->SetMin({ GetWindowSize().x / 2 - GetWindowSize().x / 3, GetWindowSize().y / 2 - GetWindowSize().x / 4 });
+	winText->SetMax({ GetWindowSize().x / 2 + GetWindowSize().x / 3, GetWindowSize().y / 2 + GetWindowSize().x / 4 });
+
+	loseText->SetMin({ GetWindowSize().x / 2 - GetWindowSize().x / 3, GetWindowSize().y / 2 - GetWindowSize().x / 4 });
+	loseText->SetMax({ GetWindowSize().x / 2 + GetWindowSize().x / 3, GetWindowSize().y / 2 + GetWindowSize().x / 4 });
 }
 
 void Application::_ConfigureSettings() {
