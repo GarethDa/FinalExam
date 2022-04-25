@@ -50,6 +50,7 @@
 #include "Gameplay/Components/EnemyBehaviour.h"
 #include "Gameplay/Components/HealthManager.h"
 #include "Gameplay/Components/GoalBehaviour.h"
+#include "Gameplay/Components/ProjBehaviour.h"
 
 #include "Gameplay/Physics/RigidBody.h"
 
@@ -333,6 +334,7 @@ void Application::_RegisterClasses()
 	ComponentManager::RegisterType<EnemyBehaviour>();
 	ComponentManager::RegisterType<HealthManager>();
 	ComponentManager::RegisterType<GoalBehaviour>();
+	ComponentManager::RegisterType<ProjBehaviour>();
 }
 
 void Application::_Load() {

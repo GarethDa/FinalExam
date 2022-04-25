@@ -6,6 +6,8 @@
 #include "Utils/ImGuiHelper.h"
 #include "Application/Application.h"
 #include "Gameplay/Components/GUI/GuiPanel.h"
+#include "Gameplay/Physics/RigidBody.h"
+#include "Gameplay/Components/ProjBehaviour.h"
 
 EnemyBehaviour::EnemyBehaviour()
 	: IComponent(),
@@ -25,6 +27,8 @@ void EnemyBehaviour::Update(float deltaTime)
 
 	invTime -= deltaTime;
 
+	throwTime -= deltaTime;
+
 	if (glm::length(camObject->GetPosition() - GetGameObject()->GetPosition()) < 2.5f && invTime <= 0.0f)
 	{
 		camObject->Get<HealthManager>()->TakeHit();
@@ -42,6 +46,24 @@ void EnemyBehaviour::Update(float deltaTime)
 		invTime = 1.5f;
 	}
 
+	if (throwTime <= 0.0f)
+	{
+		projectile->SetPostion(GetGameObject()->GetPosition());
+
+		int newTime = rand() % 3 + 1;
+
+		projectile->Get<ProjBehaviour>()->SetParams(
+			GetGameObject()->GetPosition(), camObject->GetPosition(), newTime
+		);
+
+		throwTime = newTime;
+	}
+
+}
+
+void EnemyBehaviour::SetProj(Gameplay::GameObject::Sptr object)
+{
+	projectile = object;
 }
 
 void EnemyBehaviour::RenderImGui()

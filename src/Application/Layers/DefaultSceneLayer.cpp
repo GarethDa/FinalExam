@@ -53,6 +53,7 @@
 #include "Gameplay/Components/HealthManager.h"
 #include "Gameplay/Components/EnemyBehaviour.h"
 #include "Gameplay/Components/GoalBehaviour.h"
+#include "Gameplay/Components/ProjBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -144,8 +145,8 @@ void DefaultSceneLayer::_CreateScene()
 		// Load in the meshes
 		MeshResource::Sptr monkeyMesh = ResourceManager::CreateAsset<MeshResource>("Monkey.obj");
 		MeshResource::Sptr shipMesh   = ResourceManager::CreateAsset<MeshResource>("fenrir.obj");
-		MeshResource::Sptr FrogMesh = ResourceManager::CreateAsset<MeshResource>("Frogger.obj");
-		MeshResource::Sptr CarMesh = ResourceManager::CreateAsset<MeshResource>("Car.obj");
+		MeshResource::Sptr DoorMesh = ResourceManager::CreateAsset<MeshResource>("DoorNew.obj");
+		MeshResource::Sptr KnightMesh = ResourceManager::CreateAsset<MeshResource>("Knight.obj");
 
 		// Load in some textures
 		Texture2D::Sptr    boxTexture   = ResourceManager::CreateAsset<Texture2D>("textures/box-diffuse.png");
@@ -159,8 +160,9 @@ void DefaultSceneLayer::_CreateScene()
 		grassTex->SetMinFilter(MinFilter::Nearest);
 		grassTex->SetMagFilter(MagFilter::Nearest);
 
-		Texture2D::Sptr    FrogTex = ResourceManager::CreateAsset<Texture2D>("textures/Frog_Texture.png");
-		Texture2D::Sptr    CarTex = ResourceManager::CreateAsset<Texture2D>("textures/Car_Texture.png");
+		Texture2D::Sptr    DoorTex = ResourceManager::CreateAsset<Texture2D>("textures/door.png");
+		Texture2D::Sptr    KnightTex = ResourceManager::CreateAsset<Texture2D>("textures/knight.png");
+		Texture2D::Sptr    redTex = ResourceManager::CreateAsset<Texture2D>("textures/red.png");
 
 		// Load some images for drag n' drop
 		ResourceManager::CreateAsset<Texture2D>("textures/flashlight.png");
@@ -241,20 +243,28 @@ void DefaultSceneLayer::_CreateScene()
 			grassMaterial->Set("u_Material.NormalMap", normalMapDefault);
 		}
 
-		Material::Sptr FrogMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
+		Material::Sptr redMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
 		{
-			FrogMaterial->Name = "Monkey";
-			FrogMaterial->Set("u_Material.AlbedoMap", FrogTex);
-			FrogMaterial->Set("u_Material.NormalMap", normalMapDefault);
-			FrogMaterial->Set("u_Material.Shininess", 0.5f);
+			redMaterial->Name = "Red";
+			redMaterial->Set("u_Material.AlbedoMap", redTex);
+			redMaterial->Set("u_Material.Shininess", 0.1f);
+			redMaterial->Set("u_Material.NormalMap", normalMapDefault);
 		}
 
-		Material::Sptr CarMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
+		Material::Sptr DoorMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
 		{
-			CarMaterial->Name = "Car";
-			CarMaterial->Set("u_Material.AlbedoMap", CarTex);
-			CarMaterial->Set("u_Material.NormalMap", normalMapDefault);
-			CarMaterial->Set("u_Material.Shininess", 0.7f);
+			DoorMaterial->Name = "Door";
+			DoorMaterial->Set("u_Material.AlbedoMap", DoorTex);
+			DoorMaterial->Set("u_Material.NormalMap", normalMapDefault);
+			DoorMaterial->Set("u_Material.Shininess", 0.5f);
+		}
+
+		Material::Sptr KnightMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
+		{
+			KnightMaterial->Name = "Knight";
+			KnightMaterial->Set("u_Material.AlbedoMap", KnightTex);
+			KnightMaterial->Set("u_Material.NormalMap", normalMapDefault);
+			KnightMaterial->Set("u_Material.Shininess", 0.7f);
 		}
 
 		// This will be the reflective material, we'll make the whole thing 90% reflective
@@ -339,7 +349,6 @@ void DefaultSceneLayer::_CreateScene()
 			camera->Add<SimpleCameraControl>();
 
 			camera->Add<HealthManager>();
-
 
 			RenderComponent::Sptr renderer = camera->Add<RenderComponent>();
 			renderer->SetMesh(monkeyMesh);
@@ -432,8 +441,8 @@ void DefaultSceneLayer::_CreateScene()
 
 			// Create and attach a RenderComponent to the object to draw our mesh
 			RenderComponent::Sptr renderer = goal->Add<RenderComponent>();
-			renderer->SetMesh(FrogMesh);
-			renderer->SetMaterial(FrogMaterial);
+			renderer->SetMesh(DoorMesh);
+			renderer->SetMaterial(DoorMaterial);
 
 			GameObject::Sptr particles = scene->CreateGameObject("Particles");
 			goal->AddChild(particles);
@@ -459,7 +468,28 @@ void DefaultSceneLayer::_CreateScene()
 			particleManager->AddEmitter(emitter);
 		}
 
-		GameObject::Sptr car1 = scene->CreateGameObject("Car 1");
+		GameObject::Sptr projectile = scene->CreateGameObject("Projectile1");
+		{
+			// Make a big tiled mesh
+			MeshResource::Sptr tiledMesh = ResourceManager::CreateAsset<MeshResource>();
+			tiledMesh->AddParam(MeshBuilderParam::CreateIcoSphere({ 0.0f, 0.0f, 0.0f }, 2));
+			tiledMesh->GenerateMesh();
+
+			projectile->SetScale({ 0.15f, 0.15f, 0.15f });
+			projectile->SetPostion({ 25.0f, 0.0f, 0.0f });
+
+			// Create and attach a RenderComponent to the object to draw our mesh
+			RenderComponent::Sptr renderer = projectile->Add<RenderComponent>();
+			renderer->SetMesh(tiledMesh);
+			renderer->SetMaterial(redMaterial);
+
+			// Attach a plane collider that extends infinitely along the X/Y axis
+			RigidBody::Sptr physics = projectile->Add<RigidBody>(RigidBodyType::Kinematic);
+
+			projectile->Add<ProjBehaviour>()->SetParams({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, 1.0f);
+		}
+
+		GameObject::Sptr car1 = scene->CreateGameObject("Knight 1");
 		{
 			// Set position in the scene
 			car1->SetScale(glm::vec3(2.5f, 2.5f, 2.5f));
@@ -468,15 +498,15 @@ void DefaultSceneLayer::_CreateScene()
 
 			// Create and attach a renderer for the monkey
 			RenderComponent::Sptr renderer = car1->Add<RenderComponent>();
-			renderer->SetMesh(CarMesh);
-			renderer->SetMaterial(CarMaterial);
+			renderer->SetMesh(KnightMesh);
+			renderer->SetMaterial(KnightMaterial);
 
 			std::vector<glm::vec3> points{ glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(2.8f, 12.8f, 0.0f), 
 				glm::vec3(-1.5f, -11.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f) };
 
 			car1->Add<LerpBehaviour>()->SetParams(points, 2.0f);
 
-			car1->Add<EnemyBehaviour>();
+			car1->Add<EnemyBehaviour>()->SetProj(projectile);
 
 			GameObject::Sptr particles = scene->CreateGameObject("Particles");
 			car1->AddChild(particles);
@@ -501,8 +531,29 @@ void DefaultSceneLayer::_CreateScene()
 
 			particleManager->AddEmitter(emitter);
 		}
-		
-		GameObject::Sptr car2 = scene->CreateGameObject("Car 2");
+
+		GameObject::Sptr projectile2 = scene->CreateGameObject("Projectile2");
+		{
+			// Make a big tiled mesh
+			MeshResource::Sptr tiledMesh = ResourceManager::CreateAsset<MeshResource>();
+			tiledMesh->AddParam(MeshBuilderParam::CreateIcoSphere({ 0.0f, 0.0f, 0.0f }, 2));
+			tiledMesh->GenerateMesh();
+
+			projectile2->SetScale({ 0.15f, 0.15f, 0.15f });
+			projectile2->SetPostion({ 25.0f, 0.0f, 0.0f });
+
+			// Create and attach a RenderComponent to the object to draw our mesh
+			RenderComponent::Sptr renderer = projectile2->Add<RenderComponent>();
+			renderer->SetMesh(tiledMesh);
+			renderer->SetMaterial(redMaterial);
+
+			// Attach a plane collider that extends infinitely along the X/Y axis
+			RigidBody::Sptr physics = projectile2->Add<RigidBody>(RigidBodyType::Kinematic);
+
+			projectile2->Add<ProjBehaviour>()->SetParams({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, 1.0f);
+		}
+
+		GameObject::Sptr car2 = scene->CreateGameObject("Knight 2");
 		{
 			// Set position in the scene
 			car2->SetScale(glm::vec3(2.5f, 2.5f, 2.5f));
@@ -511,15 +562,15 @@ void DefaultSceneLayer::_CreateScene()
 
 			// Create and attach a renderer for the monkey
 			RenderComponent::Sptr renderer = car2->Add<RenderComponent>();
-			renderer->SetMesh(CarMesh);
-			renderer->SetMaterial(CarMaterial);
+			renderer->SetMesh(KnightMesh);
+			renderer->SetMaterial(KnightMaterial);
 
 			std::vector<glm::vec3> points{ glm::vec3(10.0f, 11.0f, 0.0f), glm::vec3(16.0f, 5.0f, 0.0f), 
 				glm::vec3(11.0f, -10.5f, 0.0f), glm::vec3(2.5f, -5.0f, 0.0f) };
 
 			car2->Add<LerpBehaviour>()->SetParams(points, 1.5f, true, false);
 
-			car2->Add<EnemyBehaviour>();
+			car2->Add<EnemyBehaviour>()->SetProj(projectile2);
 
 			GameObject::Sptr particles = scene->CreateGameObject("Particles");
 			car2->AddChild(particles);
@@ -545,6 +596,7 @@ void DefaultSceneLayer::_CreateScene()
 			particleManager->AddEmitter(emitter);
 		}
 
+		/*
 		GameObject::Sptr car3 = scene->CreateGameObject("Car 3");
 		{
 			// Set position in the scene
@@ -587,7 +639,7 @@ void DefaultSceneLayer::_CreateScene()
 
 			particleManager->AddEmitter(emitter);
 		}
-		
+		*/
 		
 		GameObject::Sptr shadowCaster = scene->CreateGameObject("Shadow Light");
 		{

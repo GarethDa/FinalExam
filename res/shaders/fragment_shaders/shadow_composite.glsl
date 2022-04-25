@@ -191,9 +191,6 @@ void main() {
     if (shadowPos.x < 0 || shadowPos.x > 1 || 
         shadowPos.y < 0 || shadowPos.y > 1 || 
         shadowPos.z < 0 || shadowPos.z > 1) {
-        //outDiffuse  = vec4(1, 0, 0, 1);
-        //outSpecular = vec4(1, 0, 0, 1);
-        //return;
         discard;
     }
 

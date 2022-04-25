@@ -168,14 +168,14 @@ void RenderLayer::_AccumulateLighting()
 	data.AmbientCol = scene->GetAmbientLight();
 	data.EnvironmentRotation = scene->GetSkyboxRotation() * glm::inverse(glm::mat3(scene->MainCamera->GetView()));
 
-	glm::vec3 tempAmb;
+	glm::vec3 amb;
 
 	//Disable ambient if flag is toggled
-	if (RenderFlagIsActive(RenderFlags::DisableAmbient)) tempAmb = glm::vec3(0.0f);
+	if (RenderFlagIsActive(RenderFlags::DisableAmbient)) amb = glm::vec3(0.0f);
 
-	else tempAmb = scene->GetAmbientLight();
+	else amb = scene->GetAmbientLight();
 
-	const glm::vec3& ambient = tempAmb;
+	const glm::vec3& ambient = amb;
 
 	const glm::vec4 colors[2] = {
 		{ ambient, 1.0f },         // diffuse (multiplicative)

@@ -32,12 +32,13 @@ float HealthManager::GetMaxHealth()
 void HealthManager::TakeHit()
 {
 	_healthVal--;
+	
 	std::cout << "Health: " << _healthVal << '\n';
 }
 
 bool HealthManager::IsDead()
 {
-	return _healthVal <= 0.0f;
+ 	return _healthVal <= 0.0f;
 }
 
 void HealthManager::RenderImGui()

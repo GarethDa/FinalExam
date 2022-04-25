@@ -16,6 +16,8 @@ public:
 	virtual void Awake() override;
 	virtual void Update(float deltaTime) override;
 
+	void SetProj(Gameplay::GameObject::Sptr object);
+
 public:
 	virtual void RenderImGui() override;
 
@@ -25,7 +27,8 @@ public:
 
 protected:
 	float invTime;
+	float throwTime;
 
-	Gameplay::GameObject::Sptr _player;
+	Gameplay::GameObject::Sptr projectile;
 };
 
