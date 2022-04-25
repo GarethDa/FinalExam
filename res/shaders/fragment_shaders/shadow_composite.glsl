@@ -91,7 +91,7 @@ void CalcDirectionalLightContribution(vec3 viewPos, vec3 normal, Light light, fl
         diffuse += NdotL * attenuation * light.PositionIntensity.w * light.ColorAttenuation.rgb;
         
         vec3 reflectDir = reflect(lightDir, normal);
-        float VdotR = pow(max(dot(normalize(-viewPos), reflectDir), 0.0), pow(2, shininess * 8));
+        float VdotR = pow(max(dot(normalize(-viewPos), reflectDir), 0.0), pow(2, shininess * 3));
         
         specular += VdotR * light.ColorAttenuation.rgb * shininess * attenuation * light.PositionIntensity.w;
 }

@@ -251,10 +251,10 @@ void DefaultSceneLayer::_CreateScene()
 
 		Material::Sptr CarMaterial = ResourceManager::CreateAsset<Material>(deferredForward);
 		{
-			CarMaterial->Name = "Monkey";
+			CarMaterial->Name = "Car";
 			CarMaterial->Set("u_Material.AlbedoMap", CarTex);
 			CarMaterial->Set("u_Material.NormalMap", normalMapDefault);
-			CarMaterial->Set("u_Material.Shininess", 0.5f);
+			CarMaterial->Set("u_Material.Shininess", 0.7f);
 		}
 
 		// This will be the reflective material, we'll make the whole thing 90% reflective
